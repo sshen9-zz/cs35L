@@ -1,0 +1,48 @@
+#! /bin/bash
+
+recursion="F"
+if [ "$1" == '-r' ]; then
+    recursion="T"
+    shift
+fi
+
+param=$1
+firstchar=${param::1}
+if [ "$#" -gt 1 ] || [ "$firstchar" == '-' ]; then
+    >&2 echo "error"
+    exit 1
+fi
+
+if [ ! -d "$param" ]  && [ "$#" -ne 0 ]; then    
+    >&2 echo "error: dir doesnt exist: '$param'"
+    exit 1
+fi
+
+if [ ! -r "$param" ]; then
+    exit 1
+fi
+
+if [ "$#" -eq 0 ]; then
+    param='.'
+fi
+
+#check recursion
+
+if [ "$recursion" == 'T' ]; then
+    ##call poornames on each directory
+    find "${param}" -type d -exec ./poornames '{}' \;
+else    
+    d=$(find "${param}" -maxdepth 1 -mindepth 1)
+    valid=$(echo "$d" | grep -E "/[[:alpha:]_]([-._[:alpha:]]){0,13}$")
+    filtered=$(echo "$d" | grep -vE "/[[:alpha:]_]([-._[:alpha:]]){0,13}$")
+    duplicates=$(echo "$valid" | sort -f | uniq -i -D)
+
+    if [ ! -z "${filtered}" ]; then	
+	echo "${filtered}" | xargs -d '\n' -r ls -p1Nd
+    fi
+
+    if [ ! -z "${duplicates}" ]; then
+        echo "${duplicates}" | xargs -d '\n' -r ls -p1Nd
+    fi
+    
+fi
