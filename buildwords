@@ -1,0 +1,16 @@
+#! /bin/bash
+#hawaiian english
+
+tr -d '?' |
+sed -E 's/<u>|<\/u>//g' |
+#filter out question marks and u tags
+
+tr '`' "'" |
+tr '-' ' ' |
+#replace backticks and spaces with apostrophes and replace dashes with spaces
+grep -E " *<td[^>]*>[ 'pPkKmMnNwWlLhHaAeEiIoOuU]+</td> *" |
+sed -E 's/<td[^>]*>|<\/td>//g' |
+#filter out hawaiian letters only and remove tags                  
+tr '[:upper:]' '[:lower:]' |
+tr -s ' ' '[\n*]' | sort -u
+#convert to lowercase and sort uniquely with each word on a new line 
